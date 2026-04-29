@@ -133,7 +133,7 @@ export default function LeadDetail() {
               <p className="text-xs text-muted-foreground mb-1.5">Tags</p>
               <div className="flex flex-wrap gap-1">
                 {(lead.tags ?? []).length === 0 && <span className="text-muted-foreground text-xs">No tags</span>}
-                {(lead.tags ?? []).map((t) => <Badge key={t.id} variant="secondary">{t.name}</Badge>)}
+                {(lead.tags ?? []).map((t) => <TagBadge key={t.id} tag={t} />)}
               </div>
             </div>
             {lead.is_returned && lead.returned_from_lead_id && (
