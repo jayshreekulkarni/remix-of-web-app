@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tag } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TagBadge } from "@/components/TagBadge";
+import { TAG_COLORS, TagColor, tagDotStyle } from "@/lib/tagColors";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -18,6 +19,7 @@ export function TagSelector({ selected, onChange, className }: Props) {
   const [open, setOpen] = useState(false);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [query, setQuery] = useState("");
+  const [newColor, setNewColor] = useState<TagColor>("sand");
 
   useEffect(() => { void loadTags(); }, []);
 
@@ -36,7 +38,7 @@ export function TagSelector({ selected, onChange, className }: Props) {
     if (!lower) return;
     const { data, error } = await supabase
       .from("tags")
-      .insert({ name: query.trim() })
+      .insert({ name: query.trim(), color: newColor })
       .select()
       .single();
     if (!error && data) {
@@ -44,6 +46,7 @@ export function TagSelector({ selected, onChange, className }: Props) {
       setAllTags((prev) => [...prev, t]);
       onChange([...selected, t]);
       setQuery("");
+      setNewColor("sand");
     }
   }
 
@@ -59,17 +62,7 @@ export function TagSelector({ selected, onChange, className }: Props) {
     <div className={cn("space-y-2", className)}>
       <div className="flex flex-wrap gap-1.5">
         {selected.map((t) => (
-          <Badge key={t.id} variant="secondary" className="gap-1 pr-1">
-            {t.name}
-            <button
-              type="button"
-              onClick={() => toggle(t)}
-              className="rounded-full hover:bg-muted-foreground/20 p-0.5"
-              aria-label={`Remove ${t.name}`}
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </Badge>
+          <TagBadge key={t.id} tag={t} onRemove={() => toggle(t)} />
         ))}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -77,41 +70,54 @@ export function TagSelector({ selected, onChange, className }: Props) {
               <Plus className="h-3 w-3" /> Add tag
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-0" align="start">
+          <PopoverContent className="w-72 p-0" align="start">
             <Command shouldFilter>
               <CommandInput
                 value={query}
                 onValueChange={setQuery}
                 placeholder="Search or create..."
               />
+              {lower && !exists && (
+                <div className="border-b border-border/60 px-3 py-2 space-y-2 bg-muted/30">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Pick a color</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TAG_COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setNewColor(c)}
+                        style={tagDotStyle(c)}
+                        className={cn(
+                          "h-5 w-5 rounded-full border transition-all",
+                          newColor === c ? "ring-2 ring-offset-1 ring-foreground/40 scale-110" : "border-black/10",
+                        )}
+                        aria-label={`Color ${c}`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={createTag}
+                    className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent rounded flex items-center gap-2"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Create "<span className="font-medium">{query.trim()}</span>"
+                  </button>
+                </div>
+              )}
               <CommandList>
-                <CommandEmpty>
-                  {lower ? (
-                    <button
-                      type="button"
-                      onClick={createTag}
-                      className="w-full text-left text-sm px-2 py-1.5 hover:bg-accent rounded"
-                    >
-                      Create "<span className="font-medium">{query.trim()}</span>"
-                    </button>
-                  ) : "No tags yet"}
-                </CommandEmpty>
+                <CommandEmpty>{lower ? null : "No tags yet"}</CommandEmpty>
                 <CommandGroup>
                   {allTags.map((t) => {
                     const isSel = !!selected.find((s) => s.id === t.id);
                     return (
                       <CommandItem key={t.id} value={t.name} onSelect={() => toggle(t)}>
                         <Check className={cn("mr-2 h-4 w-4", isSel ? "opacity-100" : "opacity-0")} />
+                        <span style={tagDotStyle(t.color)} className="h-2.5 w-2.5 rounded-full mr-2" />
                         {t.name}
                       </CommandItem>
                     );
                   })}
-                  {lower && !exists && (
-                    <CommandItem value={`__create_${lower}`} onSelect={createTag}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create "{query.trim()}"
-                    </CommandItem>
-                  )}
                 </CommandGroup>
               </CommandList>
             </Command>
