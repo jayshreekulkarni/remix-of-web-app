@@ -32,7 +32,15 @@ const ACCENT: Partial<Record<LeadActivity["type"], string>> = {
   created: "bg-status-converted/15 text-status-converted border-status-converted/30",
 };
 
-export function ActivityTimeline({ activities }: { activities: LeadActivity[] }) {
+type Props = {
+  activities: LeadActivity[];
+  /** When provided, activities not belonging to this lead are styled as "previous lead history" */
+  currentLeadId?: string;
+  previousLead?: Lead | null;
+  previousLeadId?: string | null;
+};
+
+export function ActivityTimeline({ activities, currentLeadId, previousLead, previousLeadId }: Props) {
   const [order, setOrder] = useState<"desc" | "asc">("desc");
 
   const sorted = useMemo(() => {
@@ -45,14 +53,19 @@ export function ActivityTimeline({ activities }: { activities: LeadActivity[] })
     return arr;
   }, [activities, order]);
 
+  const hasHistory = !!previousLeadId && activities.some((a) => a.lead_id === previousLeadId);
+
   if (!activities.length) {
     return <p className="text-sm text-muted-foreground">No activity yet.</p>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{activities.length} event{activities.length === 1 ? "" : "s"}</p>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <p className="text-xs text-muted-foreground">
+          {activities.length} event{activities.length === 1 ? "" : "s"}
+          {hasHistory && <span className="ml-1.5">· includes previous lead history</span>}
+        </p>
         <Button
           variant="ghost"
           size="sm"
@@ -63,6 +76,22 @@ export function ActivityTimeline({ activities }: { activities: LeadActivity[] })
           {order === "desc" ? "Newest first" : "Oldest first"}
         </Button>
       </div>
+
+      {previousLead && (
+        <Link
+          to={`/leads/${previousLead.id}`}
+          className="block rounded-lg border border-warning/30 bg-warning/5 px-3 py-2.5 text-xs hover:bg-warning/10 transition-colors"
+        >
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="border-warning/40 text-warning">Previous lead</Badge>
+            <span className="font-medium text-foreground">{previousLead.name}</span>
+            {previousLead.phone && <span className="text-muted-foreground">· {previousLead.phone}</span>}
+            <span className="ml-auto text-muted-foreground">
+              Created {format(new Date(previousLead.created_at), "MMM d, yyyy")}
+            </span>
+          </div>
+        </Link>
+      )}
 
       <ol className="relative border-l border-border ml-3 space-y-6">
         {sorted.map((a) => {
