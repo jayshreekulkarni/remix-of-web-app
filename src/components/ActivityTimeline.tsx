@@ -97,12 +97,15 @@ export function ActivityTimeline({ activities, currentLeadId, previousLead, prev
         {sorted.map((a) => {
           const Icon = ICONS[a.type] ?? StickyNote;
           const isStatus = a.type === "status_change";
+          const isHistoric = !!currentLeadId && a.lead_id !== currentLeadId;
           return (
-            <li key={a.id} className="ml-6">
+            <li key={a.id} className={cn("ml-6", isHistoric && "opacity-90")}>
               <span
                 className={cn(
                   "absolute -left-[13px] flex h-6 w-6 items-center justify-center rounded-full border",
-                  ACCENT[a.type] ?? "bg-primary-soft text-primary border-border",
+                  isHistoric
+                    ? "bg-warning/10 text-warning border-warning/30"
+                    : (ACCENT[a.type] ?? "bg-primary-soft text-primary border-border"),
                 )}
               >
                 <Icon className="h-3 w-3" />
@@ -110,9 +113,16 @@ export function ActivityTimeline({ activities, currentLeadId, previousLead, prev
               <div
                 className={cn(
                   "rounded-lg border bg-card p-3 shadow-soft",
-                  isStatus ? "border-primary/30 bg-primary/5" : "border-border/60",
+                  isHistoric
+                    ? "border-warning/30 border-dashed bg-warning/5"
+                    : (isStatus ? "border-primary/30 bg-primary/5" : "border-border/60"),
                 )}
               >
+                {isHistoric && (
+                  <Badge variant="outline" className="mb-2 border-warning/40 text-warning text-[10px]">
+                    Previous lead
+                  </Badge>
+                )}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <p className="text-sm font-medium">{a.title}</p>
                   <span className="text-xs text-muted-foreground tabular-nums">
