@@ -33,10 +33,15 @@ export function useLeads() {
         .select("*, assignee:team_members!leads_assigned_to_fkey(*), lead_tags(tag:tags(*))")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []).map((l: any) => ({
+      const all = (data ?? []).map((l: any) => ({
         ...l,
         tags: (l.lead_tags ?? []).map((lt: any) => lt.tag).filter(Boolean),
       })) as Lead[];
+      // Hide superseded leads: any lead that a newer returned lead points back to.
+      const supersededIds = new Set(
+        all.filter((l) => l.is_returned && l.returned_from_lead_id).map((l) => l.returned_from_lead_id as string),
+      );
+      return all.filter((l) => !supersededIds.has(l.id));
     },
   });
 }
