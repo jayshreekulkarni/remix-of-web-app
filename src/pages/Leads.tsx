@@ -181,6 +181,7 @@ export default function Leads() {
                         }
                       >
                         <Check className={cn("mr-2 h-4 w-4", sel ? "opacity-100" : "opacity-0")} />
+                        <span style={tagDotStyle(t.color)} className="h-2.5 w-2.5 rounded-full mr-2" />
                         {t.name}
                       </CommandItem>
                     );
