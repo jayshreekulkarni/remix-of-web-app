@@ -4,7 +4,7 @@ import { ArrowLeft, Phone, StickyNote, CalendarClock } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useLead, useLeadActivities, useTeam } from "@/hooks/useCrmData";
+import { useLead, useLeadActivitiesWithHistory, useTeam } from "@/hooks/useCrmData";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +24,10 @@ export default function LeadDetail() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const { data: lead, isLoading } = useLead(id);
-  const { data: activities = [] } = useLeadActivities(id);
+  const { data: history } = useLeadActivitiesWithHistory(id, lead?.returned_from_lead_id ?? null);
+  const activities = history?.activities ?? [];
+  const previousLead = history?.previousLead ?? null;
+  const previousLeadId = history?.previousLeadId ?? null;
   const { data: team = [] } = useTeam();
 
   const [note, setNote] = useState("");
@@ -34,7 +37,7 @@ export default function LeadDetail() {
   const [followNote, setFollowNote] = useState("");
 
   const refresh = () => {
-    qc.invalidateQueries({ queryKey: ["activities", id] });
+    qc.invalidateQueries({ queryKey: ["activities-with-history", id] });
     qc.invalidateQueries({ queryKey: ["lead", id] });
     qc.invalidateQueries({ queryKey: ["leads"] });
   };
@@ -173,7 +176,14 @@ export default function LeadDetail() {
 
           <Card className="shadow-soft border-border/60">
             <CardHeader><CardTitle className="text-base">Activity timeline</CardTitle></CardHeader>
-            <CardContent><ActivityTimeline activities={activities} /></CardContent>
+            <CardContent>
+              <ActivityTimeline
+                activities={activities}
+                currentLeadId={lead.id}
+                previousLead={previousLead}
+                previousLeadId={previousLeadId}
+              />
+            </CardContent>
           </Card>
         </div>
       </div>

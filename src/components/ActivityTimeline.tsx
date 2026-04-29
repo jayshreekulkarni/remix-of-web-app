@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { LeadActivity, LeadStatus } from "@/lib/types";
+import { Link } from "react-router-dom";
+import { LeadActivity, Lead, LeadStatus } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,7 +32,15 @@ const ACCENT: Partial<Record<LeadActivity["type"], string>> = {
   created: "bg-status-converted/15 text-status-converted border-status-converted/30",
 };
 
-export function ActivityTimeline({ activities }: { activities: LeadActivity[] }) {
+type Props = {
+  activities: LeadActivity[];
+  /** When provided, activities not belonging to this lead are styled as "previous lead history" */
+  currentLeadId?: string;
+  previousLead?: Lead | null;
+  previousLeadId?: string | null;
+};
+
+export function ActivityTimeline({ activities, currentLeadId, previousLead, previousLeadId }: Props) {
   const [order, setOrder] = useState<"desc" | "asc">("desc");
 
   const sorted = useMemo(() => {
@@ -43,14 +53,19 @@ export function ActivityTimeline({ activities }: { activities: LeadActivity[] })
     return arr;
   }, [activities, order]);
 
+  const hasHistory = !!previousLeadId && activities.some((a) => a.lead_id === previousLeadId);
+
   if (!activities.length) {
     return <p className="text-sm text-muted-foreground">No activity yet.</p>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{activities.length} event{activities.length === 1 ? "" : "s"}</p>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <p className="text-xs text-muted-foreground">
+          {activities.length} event{activities.length === 1 ? "" : "s"}
+          {hasHistory && <span className="ml-1.5">· includes previous lead history</span>}
+        </p>
         <Button
           variant="ghost"
           size="sm"
@@ -62,16 +77,35 @@ export function ActivityTimeline({ activities }: { activities: LeadActivity[] })
         </Button>
       </div>
 
+      {previousLead && (
+        <Link
+          to={`/leads/${previousLead.id}`}
+          className="block rounded-lg border border-warning/30 bg-warning/5 px-3 py-2.5 text-xs hover:bg-warning/10 transition-colors"
+        >
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="border-warning/40 text-warning">Previous lead</Badge>
+            <span className="font-medium text-foreground">{previousLead.name}</span>
+            {previousLead.phone && <span className="text-muted-foreground">· {previousLead.phone}</span>}
+            <span className="ml-auto text-muted-foreground">
+              Created {format(new Date(previousLead.created_at), "MMM d, yyyy")}
+            </span>
+          </div>
+        </Link>
+      )}
+
       <ol className="relative border-l border-border ml-3 space-y-6">
         {sorted.map((a) => {
           const Icon = ICONS[a.type] ?? StickyNote;
           const isStatus = a.type === "status_change";
+          const isHistoric = !!currentLeadId && a.lead_id !== currentLeadId;
           return (
-            <li key={a.id} className="ml-6">
+            <li key={a.id} className={cn("ml-6", isHistoric && "opacity-90")}>
               <span
                 className={cn(
                   "absolute -left-[13px] flex h-6 w-6 items-center justify-center rounded-full border",
-                  ACCENT[a.type] ?? "bg-primary-soft text-primary border-border",
+                  isHistoric
+                    ? "bg-warning/10 text-warning border-warning/30"
+                    : (ACCENT[a.type] ?? "bg-primary-soft text-primary border-border"),
                 )}
               >
                 <Icon className="h-3 w-3" />
@@ -79,9 +113,16 @@ export function ActivityTimeline({ activities }: { activities: LeadActivity[] })
               <div
                 className={cn(
                   "rounded-lg border bg-card p-3 shadow-soft",
-                  isStatus ? "border-primary/30 bg-primary/5" : "border-border/60",
+                  isHistoric
+                    ? "border-warning/30 border-dashed bg-warning/5"
+                    : (isStatus ? "border-primary/30 bg-primary/5" : "border-border/60"),
                 )}
               >
+                {isHistoric && (
+                  <Badge variant="outline" className="mb-2 border-warning/40 text-warning text-[10px]">
+                    Previous lead
+                  </Badge>
+                )}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <p className="text-sm font-medium">{a.title}</p>
                   <span className="text-xs text-muted-foreground tabular-nums">
