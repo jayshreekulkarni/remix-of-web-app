@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { TagBadge } from "@/components/TagBadge";
+import { tagDotStyle } from "@/lib/tagColors";
 import { LEAD_STATUSES, LeadStatus } from "@/lib/types";
 import { NewLeadDialog } from "@/components/NewLeadDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -179,6 +181,7 @@ export default function Leads() {
                         }
                       >
                         <Check className={cn("mr-2 h-4 w-4", sel ? "opacity-100" : "opacity-0")} />
+                        <span style={tagDotStyle(t.color)} className="h-2.5 w-2.5 rounded-full mr-2" />
                         {t.name}
                       </CommandItem>
                     );
@@ -282,7 +285,7 @@ export default function Leads() {
                     <TableCell>{l.campaign_name ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {(l.tags ?? []).slice(0, 3).map((t) => <Badge key={t.id} variant="secondary" className="text-[10px]">{t.name}</Badge>)}
+                        {(l.tags ?? []).slice(0, 3).map((t) => <TagBadge key={t.id} tag={t} size="xs" />)}
                         {(l.tags?.length ?? 0) > 3 && <span className="text-xs text-muted-foreground">+{(l.tags!.length - 3)}</span>}
                       </div>
                     </TableCell>
