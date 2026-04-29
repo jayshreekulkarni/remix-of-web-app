@@ -176,7 +176,14 @@ export default function LeadDetail() {
 
           <Card className="shadow-soft border-border/60">
             <CardHeader><CardTitle className="text-base">Activity timeline</CardTitle></CardHeader>
-            <CardContent><ActivityTimeline activities={activities} /></CardContent>
+            <CardContent>
+              <ActivityTimeline
+                activities={activities}
+                currentLeadId={lead.id}
+                previousLead={previousLead}
+                previousLeadId={previousLeadId}
+              />
+            </CardContent>
           </Card>
         </div>
       </div>
