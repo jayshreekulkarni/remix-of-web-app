@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
-import { LeadActivity, LeadStatus } from "@/lib/types";
+import { Link } from "react-router-dom";
+import { LeadActivity, Lead, LeadStatus } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
