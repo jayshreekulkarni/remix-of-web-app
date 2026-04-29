@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { TagBadge } from "@/components/TagBadge";
+import { tagDotStyle } from "@/lib/tagColors";
 import { LEAD_STATUSES, LeadStatus } from "@/lib/types";
 import { NewLeadDialog } from "@/components/NewLeadDialog";
 import { Skeleton } from "@/components/ui/skeleton";
