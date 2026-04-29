@@ -14,7 +14,231 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          enabled: boolean
+          field_mapping: Json
+          id: string
+          last_sync_at: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          field_mapping?: Json
+          id?: string
+          last_sync_at?: string | null
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          field_mapping?: Json
+          id?: string
+          last_sync_at?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lead_activities: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          data: Json
+          description: string | null
+          id: string
+          lead_id: string
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          lead_id: string
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          lead_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_tags: {
+        Row: {
+          lead_id: string
+          tag_id: string
+        }
+        Insert: {
+          lead_id: string
+          tag_id: string
+        }
+        Update: {
+          lead_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_tags_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          campaign_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_returned: boolean
+          meta: Json
+          name: string
+          phone: string | null
+          returned_from_lead_id: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          campaign_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_returned?: boolean
+          meta?: Json
+          name: string
+          phone?: string | null
+          returned_from_lead_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          campaign_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_returned?: boolean
+          meta?: Json
+          name?: string
+          phone?: string | null
+          returned_from_lead_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_returned_from_lead_id_fkey"
+            columns: ["returned_from_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          role: Database["public"]["Enums"]["team_role"]
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["team_role"]
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["team_role"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +247,27 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_type:
+        | "created"
+        | "status_change"
+        | "note"
+        | "call"
+        | "follow_up"
+        | "assignment"
+        | "tag_change"
+        | "returned"
+        | "integration_import"
+      lead_status:
+        | "New"
+        | "Qualified"
+        | "Disqualified"
+        | "Cold"
+        | "Warm"
+        | "Hot"
+        | "Negotiation"
+        | "Converted"
+        | "Inactive"
+      team_role: "Admin" | "Manager" | "Sales Executive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +394,30 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_type: [
+        "created",
+        "status_change",
+        "note",
+        "call",
+        "follow_up",
+        "assignment",
+        "tag_change",
+        "returned",
+        "integration_import",
+      ],
+      lead_status: [
+        "New",
+        "Qualified",
+        "Disqualified",
+        "Cold",
+        "Warm",
+        "Hot",
+        "Negotiation",
+        "Converted",
+        "Inactive",
+      ],
+      team_role: ["Admin", "Manager", "Sales Executive"],
+    },
   },
 } as const
