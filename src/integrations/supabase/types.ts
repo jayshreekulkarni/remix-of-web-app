@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      integration_sync_logs: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          integration_id: string
+          leads_created: number
+          leads_skipped: number
+          message: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          integration_id: string
+          leads_created?: number
+          leads_skipped?: number
+          message?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          integration_id?: string
+          leads_created?: number
+          leads_skipped?: number
+          message?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_sync_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integrations: {
         Row: {
           config: Json
