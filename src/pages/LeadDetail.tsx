@@ -24,7 +24,10 @@ export default function LeadDetail() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const { data: lead, isLoading } = useLead(id);
-  const { data: activities = [] } = useLeadActivities(id);
+  const { data: history } = useLeadActivitiesWithHistory(id, lead?.returned_from_lead_id ?? null);
+  const activities = history?.activities ?? [];
+  const previousLead = history?.previousLead ?? null;
+  const previousLeadId = history?.previousLeadId ?? null;
   const { data: team = [] } = useTeam();
 
   const [note, setNote] = useState("");
