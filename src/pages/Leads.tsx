@@ -282,7 +282,7 @@ export default function Leads() {
                     <TableCell>{l.campaign_name ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {(l.tags ?? []).slice(0, 3).map((t) => <Badge key={t.id} variant="secondary" className="text-[10px]">{t.name}</Badge>)}
+                        {(l.tags ?? []).slice(0, 3).map((t) => <TagBadge key={t.id} tag={t} size="xs" />)}
                         {(l.tags?.length ?? 0) > 3 && <span className="text-xs text-muted-foreground">+{(l.tags!.length - 3)}</span>}
                       </div>
                     </TableCell>
