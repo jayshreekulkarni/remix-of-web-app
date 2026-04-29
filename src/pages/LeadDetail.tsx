@@ -37,7 +37,7 @@ export default function LeadDetail() {
   const [followNote, setFollowNote] = useState("");
 
   const refresh = () => {
-    qc.invalidateQueries({ queryKey: ["activities", id] });
+    qc.invalidateQueries({ queryKey: ["activities-with-history", id] });
     qc.invalidateQueries({ queryKey: ["lead", id] });
     qc.invalidateQueries({ queryKey: ["leads"] });
   };
