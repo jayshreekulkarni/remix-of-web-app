@@ -10,6 +10,7 @@ import Leads from "./pages/Leads";
 import LeadDetail from "./pages/LeadDetail";
 import Team from "./pages/Team";
 import Integrations from "./pages/Integrations";
+import Export from "./pages/Export";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/leads/:id" element={<LeadDetail />} />
               <Route path="/team" element={<Team />} />
               <Route path="/integrations" element={<Integrations />} />
+              <Route path="/export" element={<Export />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

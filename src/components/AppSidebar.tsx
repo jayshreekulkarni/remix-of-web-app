@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, UserCog, Plug } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Plug, Download } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, useSidebar,
@@ -10,6 +10,7 @@ const items = [
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Team", url: "/team", icon: UserCog },
   { title: "Integrations", url: "/integrations", icon: Plug },
+  { title: "Export", url: "/export", icon: Download },
 ];
 
 export function AppSidebar() {
