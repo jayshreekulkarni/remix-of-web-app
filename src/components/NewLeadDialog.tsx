@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+/*import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -129,4 +129,142 @@ export function NewLeadDialog({ open, onOpenChange, onCreated }: Props) {
       </DialogContent>
     </Dialog>
   );
+}*/
+
+
+
+
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+
+interface FormValues {
+  name: string;
+  phone?: string;
+  email?: string;
+  source?: string;
+  campaign_name?: string;
+  status: string;
+  assigned_to?: string;
+  tags?: string[];
 }
+
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+}
+
+interface NewLeadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated?: (lead: any) => void;
+}
+
+export const NewLeadDialog: React.FC<NewLeadDialogProps> = ({
+  open,
+  onOpenChange,
+  onCreated,
+}) => {
+  const { register, handleSubmit, reset } = useForm<FormValues>();
+  const [submitting, setSubmitting] = useState(false);
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+
+  // Fetch team members and tags from VPS backend
+  useEffect(() => {
+    if (!open) return;
+
+    // Team fetch
+    fetch("http://187.127.128.34:5000/api/team")
+      .then((res) => res.json())
+      .then((data) => setTeam(data))
+      .catch((err) => console.error("Failed to fetch team:", err));
+
+    // Tags fetch
+    fetch("http://187.127.128.34:5000/api/tags")
+      .then((res) => res.json())
+      .then((data) => setTags(data))
+      .catch((err) => console.error("Failed to fetch tags:", err));
+
+    reset();
+  }, [open, reset]);
+
+  // Submit new lead to VPS backend
+  const onSubmit = async (values: FormValues) => {
+    setSubmitting(true);
+
+    const payload = {
+      name: values.name,
+      phone: values.phone || null,
+      email: values.email || null,
+      source: values.source || null,
+      campaign_name: values.campaign_name || null,
+      status: values.status,
+      assigned_to: values.assigned_to || null,
+      tags: tags.map((t) => t.id), // adjust if needed
+    };
+
+    try {
+      const res = await fetch("http://187.127.128.34:5000/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const lead = await res.json();
+      if (!res.ok) throw new Error(lead.message || "Lead creation failed");
+
+      toast.success("Lead created successfully");
+      onCreated?.(lead);
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+
+    setSubmitting(false);
+  };
+
+  return (
+    <div>
+      {open && (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input {...register("name")} placeholder="Name" required />
+          <input {...register("phone")} placeholder="Phone" />
+          <input {...register("email")} placeholder="Email" />
+          <select {...register("status")} required>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="qualified">Qualified</option>
+            <option value="disqualified">Disqualified</option>
+            <option value="converted">Converted</option>
+            <option value="lost">Lost</option>
+          </select>
+          <select {...register("assigned_to")}>
+            <option value="">Assign to</option>
+            {team.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
+          </select>
+          <div>
+            {tags.map((tag) => (
+              <label key={tag.id}>
+                <input type="checkbox" value={tag.id} {...register("tags")} />
+                {tag.name}
+              </label>
+            ))}
+          </div>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Submitting..." : "Create Lead"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+};
