@@ -180,13 +180,13 @@ export const NewLeadDialog: React.FC<NewLeadDialogProps> = ({
     if (!open) return;
 
     // Team fetch
-    fetch("http://187.127.128.34:8080/api/team")
+    fetch("http://187.127.128.34:5000/api/team")
       .then((res) => res.json())
       .then((data) => setTeam(data))
       .catch((err) => console.error("Failed to fetch team:", err));
 
     // Tags fetch
-    fetch("http://187.127.128.34:8080/api/tags")
+    fetch("http://187.127.128.34:5000/api/tags")
       .then((res) => res.json())
       .then((data) => setTags(data))
       .catch((err) => console.error("Failed to fetch tags:", err));
@@ -210,7 +210,7 @@ export const NewLeadDialog: React.FC<NewLeadDialogProps> = ({
     };
 
     try {
-      const res = await fetch("http://187.127.128.34:8080/api/leads", {
+      const res = await fetch("http://187.127.128.34:5000/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
