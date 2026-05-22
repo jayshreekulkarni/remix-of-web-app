@@ -35,6 +35,6 @@ app.use("/api/leads", leadsRoutes);
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";
 
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
+app.listen(5000, '0.0.0.0', () => {
+  console.log('Backend running on 0.0.0.0:5000');
 });
