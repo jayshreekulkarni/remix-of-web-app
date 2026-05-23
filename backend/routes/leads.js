@@ -2,6 +2,19 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db"); // make sure this connects to your VPS database
 
+router.post("/", (req, res) => {
+  console.log(req.body);
+  res.status(201).json({
+    success: true,
+    data: req.body
+  });
+
+ 
+
+  
+
+});
+
 // GET all leads
 router.get("/", async (req, res) => {
   try {
