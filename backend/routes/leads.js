@@ -2,17 +2,73 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db"); // make sure this connects to your VPS database
 
-router.post("/", (req, res) => {
-  console.log(req.body);
-  res.status(201).json({
-    success: true,
-    data: req.body
-  });
+router.post("/", async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      email,
+      source,
+      campaign_name,
+      status,
+      assigned_to,
+      returned_from_lead_id,
+      is_returned,
+      meta,
+    } = req.body;
 
- 
+    const query = `
+      INSERT INTO public.leads (
+        name,
+        phone,
+        email,
+        source,
+        campaign_name,
+        status,
+        assigned_to,
+        returned_from_lead_id,
+        is_returned,
+        meta
+      )
+      VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
+      )
+      RETURNING *;
+    `;
 
-  
 
+    const formattedStatus =
+    status.charAt(0).toUpperCase() +
+    status.slice(1).toLowerCase();
+
+    const values = [
+      name,
+      phone || null,
+      email || null,
+      source || null,
+      campaign_name || null,
+      formattedStatus,
+      assigned_to || null,
+      returned_from_lead_id || null,
+      is_returned || false,
+      meta || {},
+    ];
+
+    const result = await pool.query(query, values);
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Lead insert error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 });
 
 // GET all leads
