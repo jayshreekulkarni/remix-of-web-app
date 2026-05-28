@@ -90,7 +90,7 @@ router.get("/", async (req, res) => {
 });
 
 // PATCH bulk assign
-router.patch("/bulk-assign", async (req, res) => {
+/*router.patch("/bulk-assign", async (req, res) => {
   const { ids, assigned_to } = req.body;
   try {
     await pool.query(
@@ -104,6 +104,72 @@ router.patch("/bulk-assign", async (req, res) => {
 });
 
 // PATCH bulk status
+router.patch("/bulk-status", async (req, res) => {
+  const { ids, status } = req.body;
+  try {
+    await pool.query(
+      `UPDATE leads SET status = $1, updated_at = NOW() WHERE id = ANY($2::uuid[])`,
+      [status, ids]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});*/
+
+
+
+// PATCH single lead by ID (status update or future fields)
+router.patch("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status, assigned_to } = req.body; // allow status or assignee updates
+
+  try {
+    const fields = [];
+    const values = [];
+
+    if (status) {
+      fields.push("status = $" + (values.length + 1));
+      values.push(status);
+    }
+
+    if (assigned_to) {
+      fields.push("assigned_to = $" + (values.length + 1));
+      values.push(assigned_to);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, message: "Nothing to update" });
+    }
+
+    // Add updated_at timestamp
+    fields.push("updated_at = NOW()");
+
+    const query = `UPDATE leads SET ${fields.join(", ")} WHERE id = $${values.length + 1} RETURNING *`;
+    values.push(id);
+
+    const result = await pool.query(query, values);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PATCH bulk assign (unchanged)
+router.patch("/bulk-assign", async (req, res) => {
+  const { ids, assigned_to } = req.body;
+  try {
+    await pool.query(
+      `UPDATE leads SET assigned_to = $1, updated_at = NOW() WHERE id = ANY($2::uuid[])`,
+      [assigned_to, ids]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH bulk status (unchanged)
 router.patch("/bulk-status", async (req, res) => {
   const { ids, status } = req.body;
   try {
