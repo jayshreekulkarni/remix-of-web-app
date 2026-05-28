@@ -46,7 +46,7 @@ export function StatusBadge({ status, className, leadId }: StatusBadgeProps) {
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
 
-      {/* Dropdown for editing status */}
+      {/* Dropdown for editing status */
     /*  <select
         value={status}
         onChange={handleStatusChange}
