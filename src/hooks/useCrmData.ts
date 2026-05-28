@@ -186,25 +186,6 @@ export function useUpdateLead() {
   });
 }
 
-/*export function useUpdateLead() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await fetch(`${API_BASE_URL}/api/leads/${id}`, {
-        method: "PATCH", // <-- Change PUT to PATCH
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }), // send only the status
-      });
-      if (!res.ok) throw new Error("Failed to update lead");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["leads"]); // refresh leads after update
-    },
-  });
-}*/
-
 export function useDeleteLead() {
   const queryClient = useQueryClient();
   return useMutation({
