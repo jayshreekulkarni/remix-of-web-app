@@ -8,7 +8,10 @@ const app = express();
 const leadRoutes = require("./routes/leads");
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://187.127.128.34:8080", // frontend URL
+  credentials: true
+}));
 app.use(express.json());
 
 // Mount the router
