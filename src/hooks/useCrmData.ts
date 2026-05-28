@@ -200,6 +200,18 @@ export function useDeleteLead() {
   });
 }
 
+export function useLeadActivitiesWithHistory(leadId: string | undefined) {
+  return useQuery({
+    queryKey: ["activities-with-history", leadId],
+    enabled: !!leadId,
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${leadId}/activities`);
+      if (!res.ok) throw new Error("Failed to fetch lead activities");
+      return res.json(); // should return an array of lead activities from your backend
+    },
+  });
+}
+
 export function useTeam() {
   return useQuery({
     queryKey: ["team"],
