@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+/*import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lead, LeadActivity, Tag, TeamMember } from "@/lib/types";
 
@@ -83,7 +83,7 @@ export function useLeadActivities(leadId: string | undefined) {
  * the activities + summary of the previous (linked) lead so they can
  * be displayed in the same timeline.
  */
-export function useLeadActivitiesWithHistory(leadId: string | undefined, previousLeadId: string | null | undefined) {
+/*export function useLeadActivitiesWithHistory(leadId: string | undefined, previousLeadId: string | null | undefined) {
   return useQuery({
     queryKey: ["activities-with-history", leadId, previousLeadId ?? null],
     enabled: !!leadId,
@@ -116,6 +116,108 @@ export function useLeadActivitiesWithHistory(leadId: string | undefined, previou
         previousLead,
         previousLeadId: previousLeadId ?? null,
       };
+    },
+  });
+}*/
+
+
+
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const API_BASE_URL = "http://187.127.128.34:5000"; // VPS backend URL
+
+export function useLeads() {
+  return useQuery({
+    queryKey: ["leads"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/leads`);
+      if (!res.ok) throw new Error("Failed to fetch leads");
+      return res.json();
+    },
+  });
+}
+
+export function useLead(id: string | undefined) {
+  return useQuery({
+    queryKey: ["lead", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${id}`);
+      if (!res.ok) throw new Error("Failed to fetch lead");
+      return res.json();
+    },
+  });
+}
+
+export function useAddLead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: any) => {
+      const res = await fetch(`${API_BASE_URL}/api/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to add lead");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["leads"]); // refresh leads after adding
+    },
+  });
+}
+
+export function useUpdateLead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to update lead");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["leads"]);
+    },
+  });
+}
+
+export function useDeleteLead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete lead");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["leads"]);
+    },
+  });
+}
+
+export function useTeam() {
+  return useQuery({
+    queryKey: ["team"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/team`);
+      if (!res.ok) throw new Error("Failed to fetch team");
+      return res.json();
+    },
+  });
+}
+
+export function useTags() {
+  return useQuery({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/tags`);
+      if (!res.ok) throw new Error("Failed to fetch tags");
+      return res.json();
     },
   });
 }
