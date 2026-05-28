@@ -90,7 +90,7 @@ router.get("/", async (req, res) => {
 });
 
 // PATCH bulk assign
-/*router.patch("/bulk-assign", async (req, res) => {
+router.patch("/bulk-assign", async (req, res) => {
   const { ids, assigned_to } = req.body;
   try {
     await pool.query(
@@ -115,12 +115,12 @@ router.patch("/bulk-status", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});*/
+});
 
 
 
 // PATCH single lead by ID (status update or future fields)
-router.patch("/:id", async (req, res) => {
+/*router.patch("/:id", async (req, res) => {
   const { id } = req.params;
   const { status, assigned_to } = req.body; // allow status or assignee updates
 
@@ -181,6 +181,6 @@ router.patch("/bulk-status", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+});*/
 
 module.exports = router;

@@ -168,7 +168,7 @@ export function useAddLead() {
   });
 }
 
-/*export function useUpdateLead() {
+export function useUpdateLead() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
@@ -184,9 +184,9 @@ export function useAddLead() {
       queryClient.invalidateQueries(["leads"]);
     },
   });
-}*/
+}
 
-export function useUpdateLead() {
+/*export function useUpdateLead() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -203,7 +203,7 @@ export function useUpdateLead() {
       queryClient.invalidateQueries(["leads"]); // refresh leads after update
     },
   });
-}
+}*/
 
 export function useDeleteLead() {
   const queryClient = useQueryClient();

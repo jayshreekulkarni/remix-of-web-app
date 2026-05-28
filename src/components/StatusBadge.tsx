@@ -1,4 +1,4 @@
-/*import { LeadStatus, STATUS_COLORS } from "@/lib/types";
+import { LeadStatus, STATUS_COLORS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function StatusBadge({ status, className }: { status: LeadStatus; className?: string }) {
@@ -14,11 +14,11 @@ export function StatusBadge({ status, className }: { status: LeadStatus; classNa
       {status}
     </span>
   );
-}*/
+}
 
 
 
-import { LeadStatus, STATUS_COLORS } from "@lib/types";
+/*import { LeadStatus, STATUS_COLORS } from "@lib/types";
 import { cn } from "@lib/utils";
 import { useUpdateLead } from "@/hooks/useCrmData";
 
@@ -47,7 +47,7 @@ export function StatusBadge({ status, className, leadId }: StatusBadgeProps) {
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
 
       {/* Dropdown for editing status */}
-      <select
+    /*  <select
         value={status}
         onChange={handleStatusChange}
         className="bg-transparent text-xs font-medium border-none outline-none cursor-pointer"
@@ -60,4 +60,4 @@ export function StatusBadge({ status, className, leadId }: StatusBadgeProps) {
       </select>
     </span>
   );
-}
+}*/
