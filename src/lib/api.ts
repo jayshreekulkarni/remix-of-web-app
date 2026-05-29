@@ -28,7 +28,7 @@ export async function addLead(payload: any) {
 // Update a lead
 export async function updateLead(id: string, payload: any) {
   const response = await fetch(`${API_BASE_URL}/api/leads/${id}`, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
@@ -44,3 +44,22 @@ export async function deleteLead(id: string) {
   if (!response.ok) throw new Error("API request failed");
   return response.json();
 }
+
+// ─── Team Members ─────────────────────────────────────────────────────────────
+ 
+export async function getTeamMembers() {
+  const res = await fetch(`${API_BASE_URL}/api/team_members`);
+  if (!res.ok) throw new Error("Failed to fetch team members");
+  return res.json();
+}
+ 
+export async function createTeamMember(payload: { name: string; email: string; role?: string }) {
+  const res = await fetch(`${API_BASE_URL}/api/team_members`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to create team member");
+  return res.json();
+}
+ 

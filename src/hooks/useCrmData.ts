@@ -159,11 +159,14 @@ export function useAddLead() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to add lead");
+      if (!res.ok){
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(err.message || "Failed to add lead");
+      } 
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["leads"]); // refresh leads after adding
+      queryClient.invalidateQueries({ queryKey: ["leads"] }) // refresh leads after adding
     },
   });
 }
@@ -173,15 +176,23 @@ export function useUpdateLead() {
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
       const res = await fetch(`${API_BASE_URL}/api/leads/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to update lead");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(err.message || "Failed to update lead");
+      }
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["leads"]);
+   onSuccess: (_data, { id }) => {
+      // Invalidate both the list and the individual lead cache
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["lead", id] });
+    },
+    onError: (err: Error) => {
+      console.error("[useUpdateLead] failed:", err.message);
     },
   });
 }
@@ -195,7 +206,7 @@ export function useDeleteLead() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["leads"]);
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
     },
   });
 }
@@ -219,6 +230,30 @@ export function useTeam() {
       const res = await fetch(`${API_BASE_URL}/api/team`);
       if (!res.ok) throw new Error("Failed to fetch team");
       return res.json();
+    },
+  });
+}
+
+export function useCreateTeamMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { name: string; email: string; role?: string; avatar_url?: string }) => {
+      const res = await fetch(`${API_BASE_URL}/api/team_members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(err.message || "Failed to create team member");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team"] });
+    },
+    onError: (err: Error) => {
+      console.error("[useCreateTeamMember] failed:", err.message);
     },
   });
 }

@@ -6,6 +6,7 @@ const app = express();
 
 // Import routes
 const leadRoutes = require("./routes/leads");
+const teamMemberRoutes = require("./routes/team_members");
 
 // Middleware
 app.use(cors({
@@ -16,6 +17,8 @@ app.use(express.json());
 
 // Mount the router
 app.use("/api/leads", leadRoutes);
+app.use("/api/team_members", teamMemberRoutes);
+app.use("/api/team",         teamMemberRoutes);
 
 // Test route to confirm server is running
 app.get("/", (req, res) => {

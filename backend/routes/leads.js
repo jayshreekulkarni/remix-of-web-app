@@ -89,6 +89,41 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ─── GET /api/leads/:id ────
+// NOTE: This must come BEFORE the PATCH /:id route
+router.get("/:id", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT l.*, tm.name AS assignee_name, tm.role AS assignee_role
+       FROM leads l
+       LEFT JOIN team_members tm ON tm.id = l.assigned_to
+       WHERE l.id = $1`,
+      [req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Lead not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Lead fetch-by-id error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// ─── GET /api/leads/:id/activities ──────────────────────────────────────────
+router.get("/:id/activities", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM lead_activities
+       WHERE lead_id = $1
+       ORDER BY created_at DESC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Lead activities fetch error:", error);
+    res.status(500).json({ error: error.message });
+  }
+}); 
 // PATCH bulk assign
 router.patch("/bulk-assign", async (req, res) => {
   const { ids, assigned_to } = req.body;
@@ -99,6 +134,7 @@ router.patch("/bulk-assign", async (req, res) => {
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Bulk assign error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -113,6 +149,7 @@ router.patch("/bulk-status", async (req, res) => {
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Bulk status error:", error); 
     res.status(500).json({ error: error.message });
   }
 });
@@ -120,7 +157,7 @@ router.patch("/bulk-status", async (req, res) => {
 
 
 // PATCH single lead by ID (status update or future fields)
-/*router.patch("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const { id } = req.params;
   const { status, assigned_to } = req.body; // allow status or assignee updates
 
@@ -128,7 +165,7 @@ router.patch("/bulk-status", async (req, res) => {
     const fields = [];
     const values = [];
 
-    if (status) {
+   /* if (status) {
       fields.push("status = $" + (values.length + 1));
       values.push(status);
     }
@@ -136,6 +173,17 @@ router.patch("/bulk-status", async (req, res) => {
     if (assigned_to) {
       fields.push("assigned_to = $" + (values.length + 1));
       values.push(assigned_to);
+    }*/
+    if (status !== undefined) {
+      fields.push(`status = $${values.length + 1}`);
+      // Normalise casing to match DB enum (e.g. "New", "Contacted")
+      values.push(status.charAt(0).toUpperCase() + status.slice(1).toLowerCase());
+    }
+ 
+    if (assigned_to !== undefined) {
+      fields.push(`assigned_to = $${values.length + 1}`);
+      // Allow unsetting assignee by passing null
+      values.push(assigned_to || null);
     }
 
     if (fields.length === 0) {
@@ -149,14 +197,18 @@ router.patch("/bulk-status", async (req, res) => {
     values.push(id);
 
     const result = await pool.query(query, values);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Lead not found" });
+    }
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
+      console.error("Lead patch error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
 // PATCH bulk assign (unchanged)
-router.patch("/bulk-assign", async (req, res) => {
+/*router.patch("/bulk-assign", async (req, res) => {
   const { ids, assigned_to } = req.body;
   try {
     await pool.query(
